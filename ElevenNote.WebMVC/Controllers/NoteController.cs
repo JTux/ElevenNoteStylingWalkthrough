@@ -24,6 +24,8 @@ namespace ElevenNote.WebMVC.Controllers
         // GET: Note/Create
         public ActionResult Create()
         {
+            PopulateCategories();
+
             return View();
         }
 
@@ -34,6 +36,7 @@ namespace ElevenNote.WebMVC.Controllers
         {
             if (!ModelState.IsValid)
             {
+                PopulateCategories();
                 return View(model);
             }
 
@@ -45,6 +48,7 @@ namespace ElevenNote.WebMVC.Controllers
                 return RedirectToAction("Index");
             }
 
+            PopulateCategories();
             ModelState.AddModelError("", "Note could not be created");
             return View(model);
         }
@@ -60,6 +64,7 @@ namespace ElevenNote.WebMVC.Controllers
         // GET: Note/Edit/{id}
         public ActionResult Edit(int id)
         {
+
             var service = CreateNoteService();
             var detail = service.GetNoteById(id);
             var model =
@@ -69,17 +74,25 @@ namespace ElevenNote.WebMVC.Controllers
                     Title = detail.Title,
                     Content = detail.Content
                 };
+            PopulateCategories(detail.CategoryId);
             return View(model);
         }
 
         // POST: Note/Edit/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, NoteEdit model)
         {
             if (!ModelState.IsValid)
+            {
+                PopulateCategories(model.CategoryId);
+
                 return View(model);
+            }
 
             if (model.NoteId != id)
             {
+                PopulateCategories(model.CategoryId);
                 ModelState.AddModelError("", "Id Mismatch");
                 return View(model);
             }
@@ -124,6 +137,16 @@ namespace ElevenNote.WebMVC.Controllers
             var userId = Guid.Parse(User.Identity.GetUserId());
             var service = new NoteService(userId);
             return service;
+        }
+
+
+        private void PopulateCategories()
+        {
+            ViewBag.CategoryId = new SelectList(new CategoryService(Guid.Parse(User.Identity.GetUserId())).GetCategories(), "CategoryId", "Name");
+        }
+        private void PopulateCategories(int id)
+        {
+            ViewBag.CategoryId = new SelectList(new CategoryService(Guid.Parse(User.Identity.GetUserId())).GetCategories(), "CategoryId", "Name", id);
         }
     }
 }
