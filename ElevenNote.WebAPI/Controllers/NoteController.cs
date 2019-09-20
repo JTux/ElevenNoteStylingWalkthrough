@@ -11,6 +11,7 @@ using System.Web.Http;
 namespace ElevenNote.WebAPI.Controllers
 {
     [Authorize]
+    [RoutePrefix("api/Note")]
     public class NoteController : ApiController
     {
         public IHttpActionResult GetAll()
@@ -67,6 +68,26 @@ namespace ElevenNote.WebAPI.Controllers
                 return InternalServerError();
 
             return Ok();
+        }
+
+        [HttpPut]
+        [Route("{id}/Star")]
+        public bool ToggleStarOn(int id)
+        {
+            var service = CreateNoteService();
+
+            var detail = service.GetNoteById(id);
+
+            var updatedNote =
+                new NoteEdit
+                {
+                    NoteId = detail.NoteId,
+                    Title = detail.Title,
+                    Content = detail.Content,
+                    IsStarred = !detail.IsStarred
+                };
+
+            return service.UpdateNote(updatedNote);
         }
 
         private NoteService CreateNoteService() => new NoteService(Guid.Parse(User.Identity.GetUserId()));

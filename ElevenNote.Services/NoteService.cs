@@ -74,6 +74,7 @@ namespace ElevenNote.Services
                         NoteId = entity.NoteId,
                         Title = entity.Title,
                         Content = entity.Content,
+                        IsStarred = entity.IsStarred,
                         CreatedUtc = entity.CreatedUtc,
                         ModifiedUtc = entity.ModifiedUtc,
                         CategoryId = entity.CategoryId,
