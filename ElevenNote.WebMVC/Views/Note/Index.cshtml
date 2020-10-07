@@ -2,13 +2,12 @@
 
 @{
     ViewBag.Title = "Index";
+    var categories = ViewBag.Categories as IEnumerable<ElevenNote.Models.CategoryModels.CategoryListItem>;
 }
 
 <h2>Index</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+
 @if (TempData.ContainsKey("SaveResult"))
 {
     <div class="alert alert-success fade in" role="alert">
@@ -18,47 +17,95 @@
         @TempData["SaveResult"]
     </div>
 }
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CategoryName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsStarred)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.CreatedUtc)
-        </th>
-        <th></th>
-    </tr>
 
-    @foreach (var item in Model)
+<ul class="nav nav-tabs">
+    @for (int i = 0; i < categories.Count(); i++)
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsStarred, new { id = item.NoteId })
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedUtc)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.NoteId }) |
-                @Html.ActionLink("Details", "Details", new { id = item.NoteId }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.NoteId })
-            </td>
-        </tr>
-    }
+        var category = categories.ElementAt(i);
 
-</table>
+        <li @Html.Raw(i == 0 ? "class=\"active\"" : "")>
+            <a data-toggle="tab" href="#cat@(category.CategoryId)">@category.Name</a>
+        </li>
+    }
+    <li>
+        <a data-toggle="tab" href="#favorites">Favorites</a>
+    </li>
+    <li>
+        @Html.ActionLink("Add Category", "Create", "Category")
+    </li>
+</ul>
+<div class="row corkboard">
+    <div class="tab-content">
+        @for (int i = 0; i < categories.Count(); i++)
+        {
+            var category = categories.ElementAt(i);
+
+            <div id="cat@(category.CategoryId)" class="tab-pane fade @(i == 0 ? "in active" : "")">
+                <div class="col-md-12">
+                    @Html.ActionLink("Create New", "Create", new { id = category.CategoryId }, new { @class = "btn btn-primary" })
+                </div>
+                @foreach (var item in Model.Where(note => note.CategoryId == category.CategoryId))
+                {
+                    <div class="col-md-4 card-container">
+                        <div class="note-card">
+                            <div class="note-title">
+                                @Html.ActionLink(item.Title, "Details", new { id = item.NoteId }, new { @class = "col-md-11" })
+                                @Html.DisplayFor(modelItem => item.IsStarred, new { id = item.NoteId })
+                            </div>
+
+                            <div class="note-body">
+                                <div class="note-date">
+                                    @Html.DisplayFor(modelItem => item.CreatedUtc)
+                                </div>
+
+                                <div class="note-body-content text-center">
+                                    @Html.DisplayFor(modelItem => item.Content)
+                                </div>
+
+                                <div class="note-options text-right">
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.NoteId })
+                                    @Html.ActionLink("Delete", "Delete", new { id = item.NoteId })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div id="favorites" class="tab-pane fade">
+            <div class="col-md-12">
+                @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-primary" })
+            </div>
+            @foreach (var item in Model.Where(note => note.IsStarred))
+            {
+                <div class="col-md-4 card-container">
+                    <div class="note-card">
+                        <div class="note-title">
+                            @Html.ActionLink(item.Title, "Details", new { id = item.NoteId }, new { @class = "col-md-11" })
+                            @Html.DisplayFor(modelItem => item.IsStarred, new { id = item.NoteId })
+                        </div>
+
+                        <div class="note-body">
+                            <div class="note-date">
+                                @Html.DisplayFor(modelItem => item.CreatedUtc)
+                            </div>
+
+                            <div class="note-body-content text-center">
+                                @Html.DisplayFor(modelItem => item.Content)
+                            </div>
+
+                            <div class="note-options text-right">
+                                @Html.ActionLink("Edit", "Edit", new { id = item.NoteId })
+                                @Html.ActionLink("Delete", "Delete", new { id = item.NoteId })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
 @section scripts {
     <script language="javascript" type="text/javascript">

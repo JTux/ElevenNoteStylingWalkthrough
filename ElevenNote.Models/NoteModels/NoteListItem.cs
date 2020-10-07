@@ -13,6 +13,8 @@ namespace ElevenNote.Models.NoteModels
 
         public string Title { get; set; }
 
+        public string Content { get; set; }
+
         [UIHint("Starred")]
         [Display(Name = "Important")]
         public bool IsStarred { get; set; }

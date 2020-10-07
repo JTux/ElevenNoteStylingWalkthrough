@@ -18,13 +18,18 @@ namespace ElevenNote.WebMVC.Controllers
             var service = CreateNoteService();
             var model = service.GetNotes();
 
+            ViewBag.Categories = new CategoryService(Guid.Parse(User.Identity.GetUserId())).GetCategories();
+
             return View(model);
         }
 
         // GET: Note/Create
-        public ActionResult Create()
+        public ActionResult Create(int? id)
         {
-            PopulateCategories();
+            if (id.HasValue)
+                PopulateCategories(id.Value);
+            else
+                PopulateCategories();
 
             return View();
         }
